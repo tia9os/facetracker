@@ -47,7 +47,7 @@ set(FACETRACK_LANDMARK_MODEL
     "${CMAKE_CURRENT_SOURCE_DIR}/models/fan2_68_landmark.onnx")
 
 if(EXISTS "${FACETRACK_FACE_MODEL}" AND EXISTS "${FACETRACK_LANDMARK_MODEL}")
-    add_custom_command(TARGET facetrack_client POST_BUILD
+    add_custom_target(facetrack_models ALL
         COMMAND ${CMAKE_COMMAND} -E make_directory
             "$<TARGET_FILE_DIR:facetrack_client>/models"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -59,6 +59,7 @@ if(EXISTS "${FACETRACK_FACE_MODEL}" AND EXISTS "${FACETRACK_LANDMARK_MODEL}")
         COMMENT "Packaging YuNet and FAN models beside the executable"
         VERBATIM
     )
+    add_dependencies(facetrack_client facetrack_models)
 endif()
 
 install(TARGETS facetrack_client RUNTIME DESTINATION .)

@@ -25,7 +25,15 @@ The client includes the two neural models required at runtime:
 - `main_client/models/face_detection_yunet_2023mar.onnx`
 - `main_client/models/fan2_68_landmark.onnx`
 
-CMake copies both models into a `models` directory beside the compiled executable. A built application directory can therefore be moved without retaining the rest of the source repository, provided the matching OpenCV runtime libraries are installed or bundled. Custom paths can also be supplied with `--face-model` and `--landmark-model`.
+The included FAN graph exposes only the heatmaps consumed by the client. Its unused
+pre-decoded landmark branch is pruned so the graph works with OpenCV 4.6 while
+preserving the exact neural heatmaps and client-side sub-pixel decoding.
+
+CMake copies both models into a `models` directory beside the compiled executable
+on every build. A built application directory can therefore be moved without
+retaining the rest of the source repository, provided the matching OpenCV runtime
+libraries are installed or bundled. Custom paths can also be supplied with
+`--face-model` and `--landmark-model`.
 
 ## Linux requirements
 
