@@ -3,7 +3,7 @@ set -euo pipefail
 
 client_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 build_dir="${client_dir}/build"
-binary="${build_dir}/facetrack_linux_client2"
+binary="${build_dir}/facetrack_client"
 
 if ! command -v cmake >/dev/null 2>&1; then
     if [[ "$(uname -s)" == "Darwin" ]]; then

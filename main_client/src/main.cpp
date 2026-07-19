@@ -84,7 +84,7 @@ int parseInteger(const std::string& text, std::string_view option) {
 void printUsage() {
     std::cout
             << "FaceTrack Client 2 - neural calibrated tracking\n"
-            << "Usage: facetrack_linux_client2 [options]\n\n"
+            << "Usage: facetrack_client [options]\n\n"
             << "  --camera N              native camera index (default 0)\n"
             << "  --width N               capture width (default 1280)\n"
             << "  --height N              capture height (default 720)\n"
@@ -186,13 +186,13 @@ fs::path resolveFaceModel(const Options& options) {
             options.executableDir / "../models/face_detection_yunet_2023mar.onnx",
             options.executableDir / "../../linux_client1/models/face_detection_yunet_2023mar.onnx",
             options.executableDir / "../../../linux_client1/models/face_detection_yunet_2023mar.onnx",
-            fs::path("linux_client2/models/face_detection_yunet_2023mar.onnx"),
+            fs::path("main_client/models/face_detection_yunet_2023mar.onnx"),
             fs::path("linux_client1/models/face_detection_yunet_2023mar.onnx"),
             fs::path("../linux_client1/models/face_detection_yunet_2023mar.onnx"),
     });
     if (!model) {
         throw std::runtime_error(
-                "YuNet model not found. Use --face-model or restore linux_client2/models."
+                "YuNet model not found. Use --face-model or restore main_client/models."
         );
     }
     return *model;
@@ -208,14 +208,14 @@ fs::path resolveLandmarkModel(const Options& options) {
             options.executableDir / "../../client4/models/fan2_68_landmark.onnx",
             options.executableDir / "../../client3/models/fan2_68_landmark.onnx",
             options.executableDir / "../../../client4/models/fan2_68_landmark.onnx",
-            fs::path("linux_client2/models/fan2_68_landmark.onnx"),
+            fs::path("main_client/models/fan2_68_landmark.onnx"),
             fs::path("client4/models/fan2_68_landmark.onnx"),
             fs::path("client3/models/fan2_68_landmark.onnx"),
             fs::path("../client4/models/fan2_68_landmark.onnx"),
     });
     if (!model) {
         throw std::runtime_error(
-                "FAN landmark model not found. Use --landmark-model or restore linux_client2/models."
+                "FAN landmark model not found. Use --landmark-model or restore main_client/models."
         );
     }
     return *model;

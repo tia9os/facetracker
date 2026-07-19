@@ -1,6 +1,6 @@
 # FaceTrack Client 2
 
-`linux_client2` is a cross-platform native C++20 face tracker for the FaceTrack Minecraft mod. The same source supports Linux, Windows, and macOS; each operating system needs its own native build.
+`main_client` is a cross-platform native C++20 face tracker for the FaceTrack Minecraft mod. The same source supports Linux, Windows, and macOS; each operating system needs its own native build.
 
 1. OpenCV YuNet detects and scores faces.
 2. A FAN ONNX network predicts 68 landmarks and per-point confidence.
@@ -22,8 +22,8 @@ Native platform integrations:
 
 The client includes the two neural models required at runtime:
 
-- `linux_client2/models/face_detection_yunet_2023mar.onnx`
-- `linux_client2/models/fan2_68_landmark.onnx`
+- `main_client/models/face_detection_yunet_2023mar.onnx`
+- `main_client/models/fan2_68_landmark.onnx`
 
 CMake copies both models into a `models` directory beside the compiled executable. A built application directory can therefore be moved without retaining the rest of the source repository, provided the matching OpenCV runtime libraries are installed or bundled. Custom paths can also be supplied with `--face-model` and `--landmark-model`.
 
@@ -38,7 +38,7 @@ sudo apt install build-essential cmake libopencv-dev
 Run:
 
 ```bash
-./linux_client2/run.sh --camera 0 --format MJPG --width 1280 --height 720 --fps 30 --mirror
+./main_client/run.sh --camera 0 --format MJPG --width 1280 --height 720 --fps 30 --mirror
 ```
 
 ## macOS requirements
@@ -53,7 +53,7 @@ brew install cmake opencv
 Run:
 
 ```bash
-./linux_client2/run.sh --camera 0 --width 1280 --height 720 --fps 30 --mirror
+./main_client/run.sh --camera 0 --width 1280 --height 720 --fps 30 --mirror
 ```
 
 The first launch should request camera permission. If capture is denied, enable the terminal application under **System Settings → Privacy & Security → Camera**. `MJPG` support varies between macOS cameras; omit `--format MJPG` or use `--format default` when necessary.
@@ -78,23 +78,23 @@ $env:VCPKG_ROOT = "C:\vcpkg"
 Run from PowerShell:
 
 ```powershell
-.\linux_client2\run.ps1 --camera 0 --width 1280 --height 720 --fps 30 --mirror
+.\main_client\run.ps1 --camera 0 --width 1280 --height 720 --fps 30 --mirror
 ```
 
-Alternatively, run `linux_client2\run.bat`. The launcher uses the vcpkg toolchain automatically when `VCPKG_ROOT` is defined. Windows may request camera permission; enable desktop camera access under **Settings → Privacy & security → Camera**.
+Alternatively, run `main_client\run.bat`. The launcher uses the vcpkg toolchain automatically when `VCPKG_ROOT` is defined. Windows may request camera permission; enable desktop camera access under **Settings → Privacy & security → Camera**.
 
 ## Validate the neural models
 
 From the repository root on Linux or macOS:
 
 ```bash
-./linux_client2/run.sh --check-models
+./main_client/run.sh --check-models
 ```
 
 On Windows:
 
 ```powershell
-.\linux_client2\run.ps1 --check-models
+.\main_client\run.ps1 --check-models
 ```
 
 Expected result:
@@ -110,7 +110,7 @@ This performs an actual FAN forward pass, not only a file check.
 Start Minecraft with the mod, then use the launcher for the current operating system.
 
 ```bash
-./linux_client2/run.sh --camera 0 --format MJPG --width 1280 --height 720 --fps 30 --mirror
+./main_client/run.sh --camera 0 --format MJPG --width 1280 --height 720 --fps 30 --mirror
 ```
 
 At startup:
@@ -125,7 +125,7 @@ Press `C` to recalibrate, `Q` or Escape to quit. Calibration is intentionally re
 For headless use on Linux:
 
 ```bash
-./linux_client2/run.sh --headless --camera 0
+./main_client/run.sh --headless --camera 0
 ```
 
 Calibration progress and tracking state are printed to the terminal.
@@ -184,17 +184,17 @@ When the filtered tongue score crosses its confidence threshold, the client send
 ## Manual build: Linux or macOS
 
 ```bash
-cmake -S linux_client2 -B linux_client2/build -DCMAKE_BUILD_TYPE=Release
-cmake --build linux_client2/build --parallel
+cmake -S main_client -B main_client/build -DCMAKE_BUILD_TYPE=Release
+cmake --build main_client/build --parallel
 ```
 
 On macOS, if CMake cannot find Homebrew OpenCV:
 
 ```bash
-cmake -S linux_client2 -B linux_client2/build \
+cmake -S main_client -B main_client/build \
   -DCMAKE_BUILD_TYPE=Release \
   -DOpenCV_DIR="$(brew --prefix opencv)/lib/cmake/opencv4"
-cmake --build linux_client2/build --parallel
+cmake --build main_client/build --parallel
 ```
 
 ## Manual build: Windows
@@ -202,14 +202,14 @@ cmake --build linux_client2/build --parallel
 From a Visual Studio Developer PowerShell:
 
 ```powershell
-cmake -S linux_client2 -B linux_client2/build `
+cmake -S main_client -B main_client/build `
   -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" `
   -DVCPKG_TARGET_TRIPLET=x64-windows
-cmake --build linux_client2/build --config Release --parallel
+cmake --build main_client/build --config Release --parallel
 ```
 
 The Windows executable is normally written to:
 
 ```text
-linux_client2/build/Release/facetrack_linux_client2.exe
+main_client/build/Release/facetrack_client.exe
 ```

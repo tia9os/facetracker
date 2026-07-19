@@ -35,8 +35,8 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $Candidates = @(
-    (Join-Path $BuildDir "Release/facetrack_linux_client2.exe"),
-    (Join-Path $BuildDir "facetrack_linux_client2.exe")
+    (Join-Path $BuildDir "Release/facetrack_client.exe"),
+    (Join-Path $BuildDir "facetrack_client.exe")
 )
 $Binary = $Candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
 if (-not $Binary) {
