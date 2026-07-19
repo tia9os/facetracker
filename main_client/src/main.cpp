@@ -16,6 +16,7 @@
 #include <vector>
 
 #include <opencv2/core.hpp>
+#include <opencv2/core/version.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/videoio.hpp>
 
@@ -181,18 +182,23 @@ fs::path resolveFaceModel(const Options& options) {
     if (!options.faceModel.empty()) {
         return options.faceModel;
     }
+#if CV_VERSION_MAJOR == 4 && CV_VERSION_MINOR < 8
+    const fs::path modelName = "face_detection_yunet_2022mar.onnx";
+#else
+    const fs::path modelName = "face_detection_yunet_2023mar.onnx";
+#endif
     auto model = firstFile({
-            options.executableDir / "models/face_detection_yunet_2023mar.onnx",
-            options.executableDir / "../models/face_detection_yunet_2023mar.onnx",
-            options.executableDir / "../../linux_client1/models/face_detection_yunet_2023mar.onnx",
-            options.executableDir / "../../../linux_client1/models/face_detection_yunet_2023mar.onnx",
-            fs::path("main_client/models/face_detection_yunet_2023mar.onnx"),
-            fs::path("linux_client1/models/face_detection_yunet_2023mar.onnx"),
-            fs::path("../linux_client1/models/face_detection_yunet_2023mar.onnx"),
+            options.executableDir / "models" / modelName,
+            options.executableDir / "../models" / modelName,
+            options.executableDir / "../../main_client/models" / modelName,
+            options.executableDir / "../../../main_client/models" / modelName,
+            fs::path("main_client/models") / modelName,
+            fs::path("models") / modelName,
     });
     if (!model) {
         throw std::runtime_error(
-                "YuNet model not found. Use --face-model or restore main_client/models."
+                "Compatible YuNet model " + modelName.string()
+                + " not found. Use --face-model or restore main_client/models."
         );
     }
     return *model;

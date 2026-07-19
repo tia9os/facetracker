@@ -20,10 +20,16 @@ Native platform integrations:
 
 ## Included models
 
-The client includes the two neural models required at runtime:
+The client includes the neural models required at runtime:
 
+- `main_client/models/face_detection_yunet_2022mar.onnx`
 - `main_client/models/face_detection_yunet_2023mar.onnx`
 - `main_client/models/fan2_68_landmark.onnx`
+
+OpenCV 4.6 and 4.7 automatically use the compatible 2022 YuNet export. OpenCV
+4.8 and newer use the more accurate 2023 export. Face detection runs on a
+stride-aligned canvas capped at 640 pixels while FAN landmarks retain their
+dedicated 256×256 face crop.
 
 The included FAN graph exposes only the heatmaps consumed by the client. Its unused
 pre-decoded landmark branch is pruned so the graph works with OpenCV 4.6 while

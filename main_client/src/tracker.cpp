@@ -22,6 +22,12 @@ namespace {
 
 constexpr int kLandmarkCount = 68;
 constexpr int kFanInputSize = 256;
+constexpr int kDetectorMaxDimension = 640;
+constexpr int kDetectorStride = 32;
+
+int alignUp(int value, int alignment) {
+    return ((value + alignment - 1) / alignment) * alignment;
+}
 
 double distance(const std::vector<cv::Point2f>& points, int first, int second) {
     cv::Point2f delta = points.at(static_cast<std::size_t>(first))
@@ -381,6 +387,11 @@ public:
     }
 
     void checkModels() {
+        cv::Mat detectorInput(320, 320, CV_8UC3, cv::Scalar::all(0));
+        detector_->setInputSize(detectorInput.size());
+        cv::Mat detectorOutput;
+        detector_->detect(detectorInput, detectorOutput);
+
         int shape[] = {1, 3, kFanInputSize, kFanInputSize};
         cv::Mat input(4, shape, CV_32F, cv::Scalar(0.0F));
         landmarkNet_.setInput(input);
@@ -491,9 +502,34 @@ public:
 
 private:
     FaceDetection detectFace(const cv::Mat& frame) {
-        detector_->setInputSize(frame.size());
+        double detectorScale = std::min(
+                1.0,
+                static_cast<double>(kDetectorMaxDimension)
+                        / static_cast<double>(std::max(frame.cols, frame.rows))
+        );
+        int resizedWidth = std::max(
+                1, static_cast<int>(std::lround(frame.cols * detectorScale))
+        );
+        int resizedHeight = std::max(
+                1, static_cast<int>(std::lround(frame.rows * detectorScale))
+        );
+        int detectorWidth = alignUp(resizedWidth, kDetectorStride);
+        int detectorHeight = alignUp(resizedHeight, kDetectorStride);
+        int padLeft = (detectorWidth - resizedWidth) / 2;
+        int padRight = detectorWidth - resizedWidth - padLeft;
+        int padTop = (detectorHeight - resizedHeight) / 2;
+        int padBottom = detectorHeight - resizedHeight - padTop;
+
+        cv::Mat resized;
+        cv::resize(frame, resized, cv::Size(resizedWidth, resizedHeight),
+                   0.0, 0.0, cv::INTER_LINEAR);
+        cv::Mat detectorFrame;
+        cv::copyMakeBorder(resized, detectorFrame, padTop, padBottom, padLeft, padRight,
+                           cv::BORDER_CONSTANT, cv::Scalar::all(0));
+
+        detector_->setInputSize(detectorFrame.size());
         cv::Mat detections;
-        detector_->detect(frame, detections);
+        detector_->detect(detectorFrame, detections);
 
         FaceDetection best;
         double bestRank = -1.0;
@@ -504,10 +540,20 @@ private:
             }
             double confidence = detections.at<float>(row, 14);
             cv::Rect rectangle = boundedRect(
-                    static_cast<int>(std::lround(detections.at<float>(row, 0))),
-                    static_cast<int>(std::lround(detections.at<float>(row, 1))),
-                    static_cast<int>(std::lround(detections.at<float>(row, 2))),
-                    static_cast<int>(std::lround(detections.at<float>(row, 3))),
+                    static_cast<int>(std::lround(
+                            (static_cast<double>(detections.at<float>(row, 0)) - padLeft)
+                                    / detectorScale
+                    )),
+                    static_cast<int>(std::lround(
+                            (static_cast<double>(detections.at<float>(row, 1)) - padTop)
+                                    / detectorScale
+                    )),
+                    static_cast<int>(std::lround(
+                            static_cast<double>(detections.at<float>(row, 2)) / detectorScale
+                    )),
+                    static_cast<int>(std::lround(
+                            static_cast<double>(detections.at<float>(row, 3)) / detectorScale
+                    )),
                     frame.cols, frame.rows
             );
             double areaRatio = static_cast<double>(rectangle.area())

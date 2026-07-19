@@ -41,18 +41,25 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
     )
 endif()
 
-set(FACETRACK_FACE_MODEL
+set(FACETRACK_FACE_MODEL_MODERN
     "${CMAKE_CURRENT_SOURCE_DIR}/models/face_detection_yunet_2023mar.onnx")
+set(FACETRACK_FACE_MODEL_LEGACY
+    "${CMAKE_CURRENT_SOURCE_DIR}/models/face_detection_yunet_2022mar.onnx")
 set(FACETRACK_LANDMARK_MODEL
     "${CMAKE_CURRENT_SOURCE_DIR}/models/fan2_68_landmark.onnx")
 
-if(EXISTS "${FACETRACK_FACE_MODEL}" AND EXISTS "${FACETRACK_LANDMARK_MODEL}")
+if(EXISTS "${FACETRACK_FACE_MODEL_MODERN}"
+        AND EXISTS "${FACETRACK_FACE_MODEL_LEGACY}"
+        AND EXISTS "${FACETRACK_LANDMARK_MODEL}")
     add_custom_target(facetrack_models ALL
         COMMAND ${CMAKE_COMMAND} -E make_directory
             "$<TARGET_FILE_DIR:facetrack_client>/models"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${FACETRACK_FACE_MODEL}"
+            "${FACETRACK_FACE_MODEL_MODERN}"
             "$<TARGET_FILE_DIR:facetrack_client>/models/face_detection_yunet_2023mar.onnx"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${FACETRACK_FACE_MODEL_LEGACY}"
+            "$<TARGET_FILE_DIR:facetrack_client>/models/face_detection_yunet_2022mar.onnx"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${FACETRACK_LANDMARK_MODEL}"
             "$<TARGET_FILE_DIR:facetrack_client>/models/fan2_68_landmark.onnx"
@@ -63,9 +70,12 @@ if(EXISTS "${FACETRACK_FACE_MODEL}" AND EXISTS "${FACETRACK_LANDMARK_MODEL}")
 endif()
 
 install(TARGETS facetrack_client RUNTIME DESTINATION .)
-if(EXISTS "${FACETRACK_FACE_MODEL}" AND EXISTS "${FACETRACK_LANDMARK_MODEL}")
+if(EXISTS "${FACETRACK_FACE_MODEL_MODERN}"
+        AND EXISTS "${FACETRACK_FACE_MODEL_LEGACY}"
+        AND EXISTS "${FACETRACK_LANDMARK_MODEL}")
     install(FILES
-        "${FACETRACK_FACE_MODEL}"
+        "${FACETRACK_FACE_MODEL_MODERN}"
+        "${FACETRACK_FACE_MODEL_LEGACY}"
         "${FACETRACK_LANDMARK_MODEL}"
         DESTINATION models
     )
